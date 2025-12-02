@@ -6,7 +6,7 @@ from app.models.order_books import OrderBook
 
 def register_routes(app):
     from app import db
-    @app.route('/orders', methods=['GET'])
+    @app.route('api/v1/orders', methods=['GET'])
     def get_orders():
         orders = Order.query.all()
         orders_list = [{'id': order.id,
@@ -18,7 +18,7 @@ def register_routes(app):
                        for order in orders]
         return jsonify(orders_list)
 
-    @app.route('/orders/<int:order_id>', methods=['GET'])
+    @app.route('api/v1/orders/<int:order_id>', methods=['GET'])
     def get_order(order_id):
         order = Order.query.get_or_404(order_id)
         return jsonify({'id': order.id, 'customer_name': order.customer_name, 'books':
@@ -27,7 +27,7 @@ def register_routes(app):
                               'price': book.price} for book in order.books],
                        'total': order.total})
 
-    @app.route('/orders', methods=['POST'])
+    @app.route('api/v1/orders', methods=['POST'])
     def create_order():
         data = request.get_json()
         new_order = Order(customer_name=data['customer_name'], total=data['total'])
