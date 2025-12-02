@@ -16,3 +16,12 @@ def register_routes(app):
                               'price': book.price} for book in order.books]}
                        for order in orders]
         return jsonify(orders_list)
+
+    @app.route('/orders/<int:order_id>', methods=['GET'])
+    def get_order(order_id):
+        order = Order.query.get_or_404(order_id)
+        return jsonify({'id': order.id, 'customer_name': order.customer_name, 'books':
+                            [{'book_id': book.book_id,
+                              'quantity': book.quantity,
+                              'price': book.price} for book in order.books],
+                       'total': order.total})
