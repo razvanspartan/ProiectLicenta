@@ -1,8 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
+from app import db
 
-db = SQLAlchemy()
-
-class OrderItem(db.Model):
+class OrderBook(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
     book_id = db.Column(db.Integer, nullable=False)
@@ -10,4 +9,4 @@ class OrderItem(db.Model):
     price = db.Column(db.Float, nullable=False)
 
     def __repr__(self):
-        return f'<OrderItem {self.item_name} (x{self.quantity})>'
+        return f'<OrderBook {self.item_name} (x{self.quantity})>'
