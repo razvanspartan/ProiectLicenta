@@ -1,4 +1,5 @@
 from flask import jsonify
+from flask import request
 
 from app.models.book import Book
 
@@ -23,3 +24,17 @@ def register_routes(app):
                         'author': book.author,
                         'stock': book.stock,
                         'price': book.price})
+
+    @app.route('/api/v1/book/books', methods=['POST'])
+    def create_book():
+        data = request.get_json()
+        new_book = Book(
+            book_title=data['book_title'],
+            author=data['author'],
+            stock=data['stock'],
+            price=data['price']
+        )
+        from app import db
+        db.session.add(new_book)
+        db.session.commit()
+        return jsonify({'message': 'book created'}), 201
