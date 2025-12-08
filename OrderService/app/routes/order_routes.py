@@ -45,3 +45,7 @@ def register_routes(app):
 
         db.session.commit()
         return jsonify({'message': 'order created'}), 201
+
+    @app.route('/api/v1/order/health', methods=['GET'])
+    def health_check():
+        return "OK", 200
