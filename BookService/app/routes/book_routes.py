@@ -38,3 +38,7 @@ def register_routes(app):
         db.session.add(new_book)
         db.session.commit()
         return jsonify({'message': 'book created'}), 201
+
+    @app.route('/api/v1/book/health', methods=['GET'])
+    def health_check():
+        return "OK", 200
