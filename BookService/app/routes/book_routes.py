@@ -39,6 +39,22 @@ def register_routes(app):
         db.session.commit()
         return jsonify({'message': 'book created'}), 201
 
+    def fib(n):
+        if n <= 1:
+            return n
+        return fib(n - 1) + fib(n - 2)
+
+    @app.route('/api/v1/book/expensive_cpu_computations', methods=['GET'])
+    def expensive_cpu_computations():
+        result = fib(40)
+        return {"fib": result}
+
+    @app.route('/api/v1/book/expensive_memory_usage', methods=['GET'])
+    def expensive_memory_usage():
+        big_list = [i for i in range(10 ** 7)]
+        total = sum(big_list)
+        return {"total": total}
+
     @app.route('/api/v1/book/health', methods=['GET'])
     def health_check():
         return "OK", 200
