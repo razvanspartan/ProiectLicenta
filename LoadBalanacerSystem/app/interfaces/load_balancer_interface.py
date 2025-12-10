@@ -12,3 +12,7 @@ class LoadBalancerInterface(ABC):
     @abstractmethod
     def get_next_service_instance(self):
         pass
+
+    @abstractmethod
+    def health_check_all_instances(self):
+        pass
