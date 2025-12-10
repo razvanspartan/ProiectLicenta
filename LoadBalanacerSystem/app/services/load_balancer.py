@@ -1,5 +1,5 @@
 from app.interfaces.load_balancer_interface import LoadBalancerInterface
-
+from flask import requests
 
 class LoadBalancer(LoadBalancerInterface):
     def __init__(self):
@@ -23,7 +23,7 @@ class LoadBalancer(LoadBalancerInterface):
     def health_check_all_instances(self):
         for instance in self.service_instances:
             try:
-                response = instance.health_check()
+                response = requests.get(f"http://{instance.ip}:{instance.port}/{instance.service_name}/health")
                 if response.status_code != 200:
                     instance.failed_health_checks += 1
                 if instance.failed_health_checks >= 3:
