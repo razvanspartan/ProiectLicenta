@@ -13,6 +13,9 @@ services:
       context: .
     ports:
       - 8000:8000
+    mem_limit: 512m
+    cpus: 0.25
+
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
