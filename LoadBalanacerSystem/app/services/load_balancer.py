@@ -8,3 +8,6 @@ class LoadBalancer(LoadBalancerInterface):
 
     def add_service_instance(self, server):
         self.service_instances.append(server)
+
+    def remove_service_instance(self, server):
+        self.service_instances.remove(server)
