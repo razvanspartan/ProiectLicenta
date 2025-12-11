@@ -8,13 +8,20 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
-  server:
+  orderservice:
     build:
       context: .
+    networks:
+      - microservice-net
     ports:
-      - 8000:8000
-    mem_limit: 512m
+      - 4000
+    command: gunicorn run:app --bind 0.0.0.0:4000
     cpus: 0.25
+    mem_limit: 200m
+
+networks:
+  microservice-net:
+    external: true
 
 
 # The commented out section below is an example of how to define a PostgreSQL
