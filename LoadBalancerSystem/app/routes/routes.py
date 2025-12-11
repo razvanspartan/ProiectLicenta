@@ -45,7 +45,6 @@ def register_routes(app):
 
     @app.route('/api/v1/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
     def send_request(path):
-        print("Here")
         segments = path.split('/')
         service_name = segments[0]
         forward_path = "/".join(segments[1:])
@@ -54,12 +53,11 @@ def register_routes(app):
         if not service_instance:
             return {"message": "No available service instances."}, 503
         url = f"http://{service_instance.ip}:{service_instance.port}/api/v1/{service_name}/{forward_path}"
-        print(url)
         method = request.method
         headers = {key: value for key, value in request.headers.items() if key.islower() != 'Host'}
         data = request.get_data()
         resp = requests.request(method, url, headers=headers, data=data, params=request.args)
-
+        print("Sent request to:", url)
         response = app.response_class(
             response=resp.content,
             status=resp.status_code,

@@ -23,8 +23,16 @@ class LoadBalancer(LoadBalancerInterface):
 
     def health_check_all_instances(self):
         for instance in self.service_instances:
-            response = requests.get(f"http://{instance.ip}:{instance.port}/api/v1/{instance.service_name}/health")
-            if response.status_code != 200:
+            try:
+                response = requests.get(f"http://{instance.ip}:{instance.port}/api/v1/{instance.service_name}/health",  timeout=2)
+                if response.status_code != 200:
+                    instance.failed_health_check_count += 1
+                    if instance.failed_health_check_count >= 3:
+                        self.remove_service_instance(instance)
+                else:
+                    instance.failed_health_check_count = 0
+            except requests.RequestException as e:
+                print({e})
                 instance.failed_health_check_count += 1
-            if instance.failed_health_check_count >= 3:
-                self.remove_service_instance(instance)
+                if instance.failed_health_check_count >= 3:
+                    self.remove_service_instance(instance)
