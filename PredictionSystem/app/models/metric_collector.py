@@ -5,7 +5,6 @@ from app.interfaces.metric_collector_interface import MetricCollectorInterface
 
 class MetricCollector(MetricCollectorInterface):
     def __init__(self, name: str):
-        self.name = name
         self.window_size_seconds = 5
         self.instances = {}
 
