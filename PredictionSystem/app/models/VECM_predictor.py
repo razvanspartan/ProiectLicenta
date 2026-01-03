@@ -14,7 +14,7 @@ class VECMPredictor:
         self.cointegration_rank = 1
         self.prediction_window_size = self.k_arr_diff_order+2
     def predict(self, input_data: list, steps: int) -> Any | None:
-        if self.model is None:
+        if self.model is not None:
             predictions = self.model.predict(input_data, steps=steps)
             return predictions
         else:
