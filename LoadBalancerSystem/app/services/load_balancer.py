@@ -1,3 +1,6 @@
+import time
+from collections import deque
+
 from app.interfaces.load_balancer_interface import LoadBalancerInterface
 import requests
 
@@ -5,7 +8,8 @@ class LoadBalancer(LoadBalancerInterface):
     def __init__(self):
         self.service_instances = []
         self.current_index = -1
-
+        self.requests = deque()
+        self.window_time_requests_seconds = 5
     def add_service_instance(self, server):
         if server.ip not in [s.ip for s in self.service_instances]:
             self.service_instances.append(server)
@@ -20,7 +24,14 @@ class LoadBalancer(LoadBalancerInterface):
         self.current_index = (self.current_index + 1) % len(self.service_instances)
         instance = self.service_instances[self.current_index]
         return instance
-
+    def count_request(self):
+        now = time.time()
+        self.requests.append(now)
+    def get_requests_per_second(self):
+        now = time.time()
+        while self.requests and self.requests[0] < now - self.window_time_requests_seconds:
+            self.requests.popleft()
+        return len(self.requests) / self.window_time_requests_seconds
     def health_check_all_instances(self):
         for instance in self.service_instances:
             try:

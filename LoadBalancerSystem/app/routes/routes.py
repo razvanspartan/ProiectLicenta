@@ -7,7 +7,6 @@ import requests
 from app.services.load_balancer_factory import LoadBalancerFactory
 
 from app.models.service_instance import ServiceInstance
-
 load_balancer_factory = LoadBalancerFactory()
 def register_routes(app):
     @app.route('/api/v1/loadbalancer/register', methods=['POST'])
@@ -58,6 +57,7 @@ def register_routes(app):
         data = request.get_data()
         resp = requests.request(method, url, headers=headers, data=data, params=request.args)
         print("Sent request to:", url)
+        load_balancer.count_request()
         response = app.response_class(
             response=resp.content,
             status=resp.status_code,
@@ -67,5 +67,13 @@ def register_routes(app):
     @app.route('/api/v1/loadbalancer/test', methods=['GET'])
     def test_load_balancer():
         return {"message": "Load Balancer is operational."}, 200
+
+    @app.route("/api/v1/loadbalancer/metrics/<string:service_name>", methods=['GET'])
+    def metrics(service_name):
+        load_balancer = load_balancer_factory.get_load_balancer(service_name=service_name)
+        return {
+            "requests_per_second" : load_balancer.get_requests_per_second(),
+        }
+
 
     threading.Thread(target=health_check_services, daemon=True).start()
