@@ -9,6 +9,8 @@
 # https://github.com/docker/awesome-compose
 services:
   loadbalancer:
+    labels:
+      service_name: loadbalancer
     build: .
     networks:
       - microservice-net

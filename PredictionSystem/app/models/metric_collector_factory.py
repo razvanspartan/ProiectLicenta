@@ -1,13 +1,14 @@
 from typing import Dict
 
-from app.services.metric_collector import MetricCollector
+from app.models.metric_collector import MetricCollector
+
 
 
 class MetricCollectorFactory:
     def __init__(self):
         self.metric_collectors = {}
 
-    def get_metric_collector(self, service_name: str) -> LoadBalancer:
+    def get_metric_collector(self, service_name: str) -> MetricCollector:
         if service_name not in self.metric_collectors:
             self.metric_collectors[service_name] = MetricCollector()
         return self.metric_collectors[service_name]
