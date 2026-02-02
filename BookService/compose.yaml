@@ -9,6 +9,8 @@
 # https://github.com/docker/awesome-compose
 services:
   bookservice:
+    labels:
+      service_name: bookservice
     build:
       context: .
     networks:
@@ -18,6 +20,7 @@ services:
     command: gunicorn run:app --bind 0.0.0.0:6000
     cpus: 0.25
     mem_limit: 200m
+
 
 networks:
   microservice-net:

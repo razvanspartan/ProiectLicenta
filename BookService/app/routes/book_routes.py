@@ -51,8 +51,19 @@ def register_routes(app):
 
     @app.route('/api/v1/bookservice/expensive_cpu_computations', methods=['GET'])
     def expensive_cpu_computations():
-        result = fib(40)
-        return {"fib": result}
+        start = time.time()
+        work_duration = 0.3  # Target total time
+
+        while time.time() - start < work_duration:
+            # Do some computation
+            x = 0
+            for i in range(1_000):  # Reduced iterations
+                x += i * i
+
+            # Add sleep to yield CPU
+            time.sleep(0.001)  # Sleep 1ms between batches
+
+        return {"status": "completed", "computation_time": work_duration}
 
     @app.route('/api/v1/bookservice/expensive_memory_usage', methods=['GET'])
     def expensive_memory_usage():
@@ -74,12 +85,8 @@ def register_routes(app):
                 "service_port": 6000
             }
             try:
-                response = requests.post(load_balancer_url, json=data)
-                if response.status_code == 201:
-                    print("BookService registered with Load Balancer successfully.")
-                else:
-                    print("BookService registration with Load Balancer failed.")
+                requests.post(load_balancer_url, json=data, timeout=2)
             except Exception as e:
                 print(f"Error registering BookService with Load Balancer: {e}")
-            time.sleep(10)
+            time.sleep(5)
     threading.Thread(target=register_to_load_balancer, daemon=True).start()
