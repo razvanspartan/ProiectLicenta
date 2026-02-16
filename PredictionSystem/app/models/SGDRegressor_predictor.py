@@ -103,13 +103,4 @@ class SGDRegressorPredictor:
         else:
             with open(path, "rb") as f:
                 self.model= pickle.load(f)
-        return SGDRegressor(
-            loss='squared_error',
-            penalty='l2',
-            alpha=0.001,
-            learning_rate='adaptive',
-            eta0=0.02,
-            warm_start=True,
-            max_iter=1,
-            tol=None
-        )
+        return None

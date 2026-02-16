@@ -24,7 +24,6 @@ def register_routes(app):
     def collect_metrics(interval=5):
         while True:
             if docker_client is None:
-                print("Docker client not available, skipping metric collection")
                 time.sleep(interval)
                 continue
 
@@ -54,7 +53,7 @@ def register_routes(app):
     def aggregate_metrics_for_smoothing():
         for metric_collector_name, metric_collector in metric_collector_factory.metric_collectors.items():
             smoothing_predictor = smoothing_predictor_factory.get_smoothing_predictor(metric_collector_name)
-            sgd_predictor = sgd_regressor_factory.get_sgd_regressor_predictor(metric_collector_name)
+            #sgd_predictor = sgd_regressor_factory.get_sgd_regressor_predictor(metric_collector_name)
             data_point = metric_collector.aggregate_metrics()
             avg_cpus.append(data_point['cpu_avg'])
             smoothing_predictor.update_model(data_point)
@@ -64,7 +63,7 @@ def register_routes(app):
             if prediction is None:
                 print("No prediction available")
                 return
-            print(f"Predicted CPU usage for {metric_collector_name} in 3(5s) steps: {prediction}")
+            print(f"Predicted CPU usage for {metric_collector_name} in 3(5s) steps: {prediction}, SGD: {prediction_sgd}")
 
     def extract_metrics_from_container(container) -> dict:
         stats = container.stats(stream=False)
