@@ -28,6 +28,18 @@ class DecisionMaker:
 
     def add_prediction_point(self, prediction):
         self.prediction_window.append(prediction)
+    def scale_up(self):
+        try:
+            service = docker_client.services.get(self.service_name)
+            current_replicas = service.attrs['Spec']['Mode']['Replicated']['Replicas']
+
+            service.scale(current_replicas + 1)
+            self.last_decision_time_seconds = time.time()
+            print(f"Scale up triggered. Now at {current_replicas + 1} nodes.")
+            self.is_scaling = False
+        except Exception as e:
+            print(f"Error scaling up: {e}")
+            self.is_scaling = False
 
     def make_decision(self):
         if self.is_scaling:
@@ -38,14 +50,12 @@ class DecisionMaker:
             recent_predictions = list(self.prediction_window)[-self.scale_up_consideration_length:]
             if all(pred > self.scale_up_threshold for pred in recent_predictions):
                 if self.instance_count < self.max_instances:
-                    self.last_decision_time_seconds = time.time()
                     self.is_scaling = True
                     return "scale_up"
         if len(self.prediction_window) >= self.scale_down_consideration_length:
             recent_predictions = list(self.prediction_window)[-self.scale_down_consideration_length:]
             if all(pred < self.scale_down_threshold for pred in recent_predictions):
                 if self.instance_count > self.min_instances:
-                    self.last_decision_time_seconds = time.time()
                     self.is_scaling = True
                     return "scale_down"
         return None
