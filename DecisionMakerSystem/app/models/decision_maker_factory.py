@@ -14,6 +14,6 @@ class DecisionMakerFactory:
             self.decision_makers[service_name] = LoadBalancer()
         return self.decision_makers[service_name]
 
-    def remove_load_balancer(self, service_name: str):
+    def remove_decision_maker(self, service_name: str):
         if service_name in self.decision_makers:
             del self.decision_makers[service_name]
