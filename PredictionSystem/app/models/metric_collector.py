@@ -1,10 +1,13 @@
+import csv
+import os
 import time
 
 from app.interfaces.metric_collector_interface import MetricCollectorInterface
 
 
 class MetricCollector(MetricCollectorInterface):
-    def __init__(self):
+    def __init__(self, service_name: str):
+        self.service_name = service_name
         self.window_size_seconds = 5
         self.instances = {}
 
@@ -28,9 +31,38 @@ class MetricCollector(MetricCollectorInterface):
             }
         cpu_avg = sum(metric["metrics"]["cpu"] for metric in self.instances.values()) / len(self.instances)
         memory_sum = sum(metric["metrics"]["memory"] for metric in self.instances.values())
-        requests_per_second= sum(metric["metrics"]["requests_per_second"] for metric in self.instances.values())
+        requests_per_second= sum(metric["metrics"]["requests_per_second"] for metric in self.instances.values()) / len(self.instances)
+        data = {
+            "cpu_avg": cpu_avg,
+            "memory_sum": memory_sum,
+            "requests_per_second": requests_per_second,
+            "instance_count": len(self.instances)
+        }
+        self.save_to_csv(data)
+        self.instances.clear()
         return {
             "cpu_avg": cpu_avg,
             "memory_sum": memory_sum,
-            "requests_per_second": requests_per_second
+            "requests_per_second": requests_per_second,
+            "instance_count": len(self.instances)
         }
+
+
+    def save_to_csv(self, aggregated_data):
+        filename = f"training_data_{self.service_name}.csv"
+        file_exists = os.path.isfile(filename)
+
+        with open(filename, mode='a', newline='') as f:
+            writer = csv.writer(f)
+            print("Writing data to training_data.csv:", aggregated_data)
+            if not file_exists:
+
+                writer.writerow(["timestamp", "cpu_avg", "memory_sum", "rps", "instance_count"])
+
+            writer.writerow([
+                time.time(),
+                aggregated_data["cpu_avg"],
+                aggregated_data["memory_sum"],
+                aggregated_data["requests_per_second"],
+                len(self.instances)
+            ])

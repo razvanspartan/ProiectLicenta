@@ -2,68 +2,82 @@ import time
 from collections import deque
 
 import docker
-
-try:
-    docker_client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
-    print("Docker client created successfully")
-except Exception as e:
-    print(f"Warning: couldn't create docker client: {e}")
-    docker_client = None
+import subprocess
+CONSTANTS={
+    "SERVICE_CPU": 25.0
+}
 
 class DecisionMaker:
-    def __init__(self, service_name, min_instances=1, max_instances=4, cooldown_seconds=120, scale_up_threshold=0.7, scale_down_threshold=0.2, scale_down_consideration_length=10, scale_up_consideration_length=5):
+    def __init__(self, service_name, min_instances=1, max_instances=5, cooldown_seconds=30, scale_up_threshold=0.7, scale_down_threshold=0.2, scale_down_consideration_length=3, scale_up_consideration_length=3):
         self.service_name = service_name
         self.min_instances = min_instances
         self.max_instances = max_instances
         self.last_decision_time_seconds = 0
         self.cooldown_seconds = cooldown_seconds
         self.prediction_window_size_max = 30
-        self.instance_count = 0
-        self.is_scaling = False
+        self.instance_count = 1
         self.prediction_window = deque(maxlen=self.prediction_window_size_max)
-        self.scale_up_threshold = scale_up_threshold
-        self.scale_down_threshold = scale_down_threshold
+        self.scale_up_threshold = scale_up_threshold * CONSTANTS["SERVICE_CPU"]
+        self.scale_down_threshold = scale_down_threshold * CONSTANTS["SERVICE_CPU"]
         self.scale_down_consideration_length = scale_down_consideration_length
         self.scale_up_consideration_length = scale_up_consideration_length
 
     def add_prediction_point(self, prediction):
         self.prediction_window.append(prediction)
+    def scale_down(self):
+        try:
+            compose_file = "/home/razvanspartan/PycharmProjects/ProiectLicenta/BookService/compose.yaml"
+            target_count = self.instance_count - 1
+            cmd = [
+                "docker", "compose","-f", compose_file, "up", "-d",
+                "--scale", f"{self.service_name}={target_count}"
+            ]
+
+            subprocess.run(cmd, check=True)
+
+            self.last_decision_time_seconds = time.time()
+            self.instance_count = target_count
+            print(f"Scale down triggered via Compose. Now at {target_count} nodes.")
+
+        except subprocess.CalledProcessError as e:
+            print(f"Error scaling down via Docker Compose: {e}")
     def scale_up(self):
         try:
-            service = docker_client.services.get(self.service_name)
-            current_replicas = service.attrs['Spec']['Mode']['Replicated']['Replicas']
+            compose_file = "/home/razvanspartan/PycharmProjects/ProiectLicenta/BookService/compose.yaml"
+            target_count = self.instance_count + 1
+            cmd = [
+                "docker", "compose","-f", compose_file, "up", "-d",
+                "--scale", f"{self.service_name}={target_count}"
+            ]
 
-            service.scale(current_replicas + 1)
+            subprocess.run(cmd, check=True)
+
             self.last_decision_time_seconds = time.time()
-            print(f"Scale up triggered. Now at {current_replicas + 1} nodes.")
-            self.is_scaling = False
-        except Exception as e:
-            print(f"Error scaling up: {e}")
-            self.is_scaling = False
+            self.instance_count = target_count
+            print(f"Scale up triggered via Compose. Now at {target_count} nodes.")
+
+        except subprocess.CalledProcessError as e:
+            print(f"Error scaling up via Docker Compose: {e}")
 
     def make_decision(self):
-        if self.is_scaling:
-            return None
         if time.time() - self.last_decision_time_seconds < self.cooldown_seconds:
-            return None
+            print(f"In cooldown period, holding decision.{time.time() - self.last_decision_time_seconds} seconds. against cooldown of {self.cooldown_seconds} seconds.")
+            return "Hold"
+        print(self.prediction_window)
         if len(self.prediction_window) >= self.scale_up_consideration_length:
             recent_predictions = list(self.prediction_window)[-self.scale_up_consideration_length:]
             if all(pred > self.scale_up_threshold for pred in recent_predictions):
                 if self.instance_count < self.max_instances:
-                    self.is_scaling = True
-                    return "scale_up"
+                    self.scale_up()
         if len(self.prediction_window) >= self.scale_down_consideration_length:
             recent_predictions = list(self.prediction_window)[-self.scale_down_consideration_length:]
             if all(pred < self.scale_down_threshold for pred in recent_predictions):
                 if self.instance_count > self.min_instances:
-                    self.is_scaling = True
-                    return "scale_down"
-        return None
+                    self.scale_down()
+        return "Hold"
 
     def increase_instance_count(self):
         self.instance_count += 1
-        self.is_scaling = False
 
     def decrease_instance_count(self):
         self.instance_count -= 1
-        self.is_scaling = False
