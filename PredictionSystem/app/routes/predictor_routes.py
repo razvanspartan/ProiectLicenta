@@ -8,9 +8,12 @@ import docker
 
 from app.models.SGDRegressor_factory import SGDRegressorPredictorFactory
 
+from app.models.lightgbm_factory import LightgbmFactory
+
 metric_collector_factory = MetricCollectorFactory()
 smoothing_predictor_factory = SmoothingPredictorFactory()
 sgd_regressor_factory = SGDRegressorPredictorFactory()
+lightgbm_factory = LightgbmFactory()
 try:
     docker_client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
     print("Docker client created successfully")
@@ -54,16 +57,24 @@ def register_routes(app):
         for metric_collector_name, metric_collector in metric_collector_factory.metric_collectors.items():
             smoothing_predictor = smoothing_predictor_factory.get_smoothing_predictor(metric_collector_name)
             #sgd_predictor = sgd_regressor_factory.get_sgd_regressor_predictor(metric_collector_name)
+            lightgbm_predictor = lightgbm_factory.get_lightgbm_predictor(metric_collector_name)
             data_point = metric_collector.aggregate_metrics()
-            avg_cpus.append(data_point['cpu_avg'])
             smoothing_predictor.update_model(data_point)
             #sgd_predictor.update_model(data_point)
+            prediction_lgbm = lightgbm_predictor.predict(data_point)
+            print(prediction_lgbm)
+            if(prediction_lgbm):
+                lightgbm_predictor.save_model()
             prediction = smoothing_predictor.predict(steps=3)
             #prediction_sgd = sgd_predictor.predict()
             if prediction is None:
                 print("No prediction available")
                 return
-            print(f"Predicted CPU usage for {metric_collector_name} in 3(5s) steps: {prediction}, SGD: {prediction_sgd}")
+            try:
+                requests.post(f"http://localhost:5000/api/v1/decisionmaker/scale/{metric_collector_name}", json={"cpu": prediction})
+            except Exception as e:
+                print(f"Error sending scaling decision for {metric_collector_name}: {e}")
+            print(f"Predicted CPU usage for {metric_collector_name} in 3(5s) steps: {prediction}")
 
     def extract_metrics_from_container(container) -> dict:
         stats = container.stats(stream=False)

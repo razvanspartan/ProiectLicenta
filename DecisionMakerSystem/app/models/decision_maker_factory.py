@@ -1,7 +1,4 @@
 from typing import Dict
-
-from app.services.load_balancer import LoadBalancer
-
 from app.models.decision_maker import DecisionMaker
 
 
@@ -11,7 +8,7 @@ class DecisionMakerFactory:
 
     def get_decision_maker(self, service_name: str) -> DecisionMaker:
         if service_name not in self.decision_makers:
-            self.decision_makers[service_name] = LoadBalancer()
+            self.decision_makers[service_name] = DecisionMaker(service_name)
         return self.decision_makers[service_name]
 
     def remove_decision_maker(self, service_name: str):

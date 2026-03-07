@@ -10,4 +10,6 @@ def register_routes(app):
         decision_maker = decision_maker_factory.get_decision_maker(service_name)
         cpu = data.get('cpu')
         decision_maker.add_prediction_point(cpu)
-        decision_maker.make_decision()
+        decision = decision_maker.make_decision()
+        print(decision)
+        return {"message": f"{decision} made based on CPU usage."}, 200

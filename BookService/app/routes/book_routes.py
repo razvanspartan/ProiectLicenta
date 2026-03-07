@@ -52,16 +52,13 @@ def register_routes(app):
     @app.route('/api/v1/bookservice/expensive_cpu_computations', methods=['GET'])
     def expensive_cpu_computations():
         start = time.time()
-        work_duration = 0.3  # Target total time
+        work_duration = 0.3
 
         while time.time() - start < work_duration:
-            # Do some computation
             x = 0
-            for i in range(1_000):  # Reduced iterations
+            for i in range(10_000):
                 x += i * i
-
-            # Add sleep to yield CPU
-            time.sleep(0.001)  # Sleep 1ms between batches
+            time.sleep(0.001)
 
         return {"status": "completed", "computation_time": work_duration}
 

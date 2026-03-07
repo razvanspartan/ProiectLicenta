@@ -10,7 +10,7 @@ class MetricCollectorFactory:
 
     def get_metric_collector(self, service_name: str) -> MetricCollector:
         if service_name not in self.metric_collectors:
-            self.metric_collectors[service_name] = MetricCollector()
+            self.metric_collectors[service_name] = MetricCollector(service_name)
         return self.metric_collectors[service_name]
 
     def remove_metric_collector(self, service_name: str):
