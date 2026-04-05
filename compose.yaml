@@ -1,0 +1,24 @@
+services:
+  bookservice:
+    build: ./BookService
+    labels:
+      service_name: "bookservice"
+    ports:
+      - "6000:6000"
+    networks:
+      - microservice-net
+    cpus: 0.25
+    mem_limit: 200m
+
+
+
+  loadbalancer:
+    build: ./LoadBalancerSystem
+    ports:
+      - "7000:7000"
+    networks:
+      - microservice-net
+
+networks:
+  microservice-net:
+    driver: bridge

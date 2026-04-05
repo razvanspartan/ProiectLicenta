@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+    <link rel="stylesheet" href="index.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MLScale Dashboard</title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="module" src="index.js"></script>
+    <body>
+    <nav></nav>
+        <div id="list-services" class="list-services-container">
+            <h1>Known Services:</h1>
+            <button class="service-button" id="bookServiceButton">
+                bookService
+            </button>
+            <button class="service-button" id="orderServiceButton">
+                orderService
+            </button>
+        </div>
+        <div class="service-data-container">
+            <h1 id="service-title">Choose a service</h1>
+            <div class="chart-container">
+            <canvas id="service_chart"></canvas>
+            </div>
+            <div class="container-list-container" id="container-list-container">
+            </div>
+        </div>
+    <div id="loading-overlay" class="loader-hidden">
+        <div class="spinner"></div>
+    </div>
+    </body>
+</html>
