@@ -1,3 +1,5 @@
+import docker
+
 try:
     docker_client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
     print("Docker client created successfully")
@@ -21,6 +23,7 @@ def register_routes(app):
                     "image": container.image.tags,
                     "status": container.status
                 })
+            print(f"Retrieved {len(container_info)} containers")
             return {"containers": container_info}, 200
         except Exception as e:
             print(f"Error listing containers: {e}")
@@ -32,15 +35,16 @@ def register_routes(app):
             return {"error": "Docker client not available"}, 503
 
         try:
-            containers = docker_client.containers.list(filters={"label": f"service_name={service_name}"})
+            containers = docker_client.containers.list()
             metrics_info = []
             for container in containers:
-                metrics_info.append({
-                    "id": container.id,
-                    "name": container.name,
-                    "metrics": extract_metrics_from_container(container)
-                })
-            return {"metrics": metrics_info}, 200
+                if service_name in container.name:
+                    metrics_info.append({
+                        "id": container.id,
+                        "name": container.name,
+                        "metrics": extract_metrics_from_container(container)
+                    })
+            return {"containers": metrics_info}, 200
         except Exception as e:
             print(f"Error retrieving metrics for service {service_name}: {e}")
             return {"error": "Failed to retrieve metrics"}, 500

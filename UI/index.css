@@ -1,0 +1,128 @@
+.list-services-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    height: 100%;
+    border: 1px solid #ccc;
+    width: 20%
+}
+* {
+    box-sizing: border-box;
+}
+.chart-container{
+    background-color: #d3d1d1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    height: 40%;
+    border-bottom: 1px solid black;
+    width: 100%;
+}
+body{
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    height: 100vh;
+    margin:0;
+}
+.service-button{
+     width: 60%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #bbbbbb;
+    color: black;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color, color, scale 0.6s ease;
+}
+.service-button:hover{
+    background-color: #0066b7;
+    color: white;
+    scale: 1.1;
+}
+.service-data-container{
+    background-color: #d3d1d1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    height: 100%;
+    border: 1px solid #ccc;
+    width: 80%;
+}
+
+.list-item{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    background-color: #eeeded;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    width: auto;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.container-list-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.list-metrics-container{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100%;
+    width: 100%;
+
+}
+.list-header{
+    font-size: 16px;
+    font-weight: bold;
+}
+p{
+    margin: 0;
+}
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.loader-hidden {
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #0066b7;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

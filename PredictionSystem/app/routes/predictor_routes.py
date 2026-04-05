@@ -56,17 +56,14 @@ def register_routes(app):
     def aggregate_metrics_for_smoothing():
         for metric_collector_name, metric_collector in metric_collector_factory.metric_collectors.items():
             smoothing_predictor = smoothing_predictor_factory.get_smoothing_predictor(metric_collector_name)
-            #sgd_predictor = sgd_regressor_factory.get_sgd_regressor_predictor(metric_collector_name)
             lightgbm_predictor = lightgbm_factory.get_lightgbm_predictor(metric_collector_name)
             data_point = metric_collector.aggregate_metrics()
             smoothing_predictor.update_model(data_point)
-            #sgd_predictor.update_model(data_point)
             prediction_lgbm = lightgbm_predictor.predict(data_point)
             print(prediction_lgbm)
             if(prediction_lgbm):
                 lightgbm_predictor.save_model()
             prediction = smoothing_predictor.predict(steps=3)
-            #prediction_sgd = sgd_predictor.predict()
             if prediction is None:
                 print("No prediction available")
                 return
