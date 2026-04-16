@@ -9,18 +9,18 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <body>
-    <div id="serviceView" class="view">
+    <div class="view">
         <div id="listServices" class="list-services-container">
-            <button class="settings-button" id="settingsButton">Scaling settings</button>
+            <button class="setting-button hidden" id="settingsButton">Scaling settings</button>
             <h1>Known Services:</h1>
-            <button class="service-button" id="bookServiceButton">
+            <button class="service-button" id="bookserviceButton">
                 bookService
             </button>
-            <button class="service-button" id="orderServiceButton">
+            <button class="service-button" id="orderserviceButton">
                 orderService
             </button>
         </div>
-            <div class="service-data-container" id="serviceDataContainer">
+            <div class="service-data-container" id="serviceView">
                 <h1 id="serviceTitle">Choose a service</h1>
                 <div class="chart-container">
                 <canvas id="serviceChart"></canvas>
@@ -28,13 +28,33 @@
                 <div class="container-list-container" id="containerListContainer">
                 </div>
             </div>
-            <div class="service-data-container-hidden" id="settingsContainer">
+            <div class="service-data-container view-hidden" id="settingsView">
+                <h1 id="settingsTitle">Scaling Settings</h1>
+                <form id="settingsForm" class="settings-form">
+                    <label for="cooldownPeriod">Cooldown Period (seconds):</label>
+                    <input type="number" id="cooldownPeriod" class="input-field" min="1" max="600" required>
 
+                    <label for="minInstances">Min Instances:</label>
+                    <input type="number" id="minInstances" class="input-field" min="1" max="8" required>
+
+                    <label for="maxInstances">Max Instances:</label>
+                    <input type="number" id="maxInstances" class="input-field" min="1" max="8" required>
+
+                    <label for="scaleUpThreshold">Scale UP Threshold (% CPU):</label>
+                    <input type="number" id="scaleUpThreshold" class="input-field" min="50" max="90" required>
+
+                    <label for="scaleDownThreshold">Scale DOWN Threshold (% CPU):</label>
+                    <input type="number" id="scaleDownThreshold" class="input-field" min="10" max="49" required>
+
+                    <div class="settings-buttons">
+                        <button type="button" class="btn primary" id="settingsSaveButton">Save</button>
+                    </div>
+
+                    <div id="settingsFeedback" class="settings-feedback" style="display:none;">Settings saved.</div>
+                </form>
             </div>
     </div>
-    <div id="loadingOverlay" class="loader-hidden">
-        <div class="spinner"></div>
-    </div>
-    <script type="module" src="index.js"></script>
-    </body>
-</html>
+     <div id="loadingOverlay" class="loader-hidden">
+         <div class="spinner"></div>
+     </div>
+     <script type="module" src="index.js"></script>

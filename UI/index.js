@@ -1,14 +1,12 @@
 let current_service = null;
 let chart = null;
-let settings_current_service = null;
 let isInsideSettings = false;
-document.getElementById("bookServiceButton")
+document.getElementById("bookserviceButton")
     .addEventListener("click", () => onClick("bookservice"));
-document.getElementById("orderServiceButton")
+document.getElementById("orderserviceButton")
     .addEventListener("click", () => onClick("orderservice"));
 document.getElementById("settingsButton").addEventListener("click", () => switchToToSettings());
-
-document.getElementById("settingsButton").addEventListener("click", () => switchToToSettings());
+document.getElementById("settingsSaveButton").addEventListener("click", () => saveSettings());
 function getAvgMetrics(data) {
     let total_cpu = 0;
     let total_mem = 0;
@@ -112,9 +110,16 @@ function clearHTML() {
     }
     listContainer.innerHTML = '';
 }
+function setServiceButtonAsSelected(service_name) {
+    document.getElementById('settingsButton').classList.remove('hidden');
+    document.getElementById('bookserviceButton').classList.remove('selected');
+    document.getElementById('orderserviceButton').classList.remove('selected');
+    document.getElementById(`${service_name}Button`).classList.add('selected');
+}
 export function onClick(service_name) {
     current_service = service_name;
     clearHTML();
+    setServiceButtonAsSelected(service_name)
     fetchContainers(service_name);
 }
 
@@ -128,15 +133,15 @@ function toggleLoader(show) {
 }
 
 function switchToToSettings() {
-    if (!current_service) {
-        alert('Please select a service first (click bookService or orderService)');
-        return;
+    if (isInsideSettings) {
+        showServiceView();
+        document.getElementById('settingsButton').textContent = 'Scaling Settings';
+    } else {
+        document.getElementById('serviceView').classList.add('view-hidden');
+        document.getElementById('settingsView').classList.remove('view-hidden');
+        document.getElementById('settingsButton').textContent = 'Back to Service';
     }
-    settings_current_service = current_service;
-    document.getElementById('settingsTitle').textContent = `Scaling Settings - ${settings_current_service}`;
-    document.getElementById('settingsView').classList.remove('view-hidden');
-    document.getElementById('serviceView').classList.add('view-hidden');
-    loadSettingsToForm(settings_current_service);
+    isInsideSettings = !isInsideSettings;
 }
 
 function showServiceView() {
@@ -144,64 +149,50 @@ function showServiceView() {
      document.getElementById('serviceView').classList.remove('view-hidden');
  }
 
- function saveSettings() {
-    if (!settings_current_service) {
-        alert('No service selected for saving settings');
-        return;
+function showSettingsFeedback(message, isError = false) {
+    const el = document.getElementById('settingsFeedback');
+    el.style.display = 'block';
+    el.textContent = message;
+    if (isError) el.classList.add('error'); else el.classList.remove('error');
+}
+
+function saveSettings() {
+    const fields = [
+        { id: 'cooldownPeriod', name: 'Cooldown Period' },
+        { id: 'minInstances', name: 'Min Instances' },
+        { id: 'maxInstances', name: 'Max Instances' },
+        { id: 'scaleUpThreshold', name: 'Scale Up Threshold' },
+        {id: 'scaleDownThreshold', name: 'Scale Down Threshold' },
+    ];
+
+    for (const f of fields) {
+        const el = document.getElementById(f.id);
+        const val = Number(el.value);
+        const min = Number(el.min);
+        const max = Number(el.max);
+        if (el.value === '' || !Number.isFinite(val)) {
+            showSettingsFeedback(`Enter a valid number for ${f.name}.`, true);
+            return;
+        }
+        if (val < min || val > max) {
+            showSettingsFeedback(`${f.name} must be between ${min} and ${max}.`, true);
+            return;
+        }
     }
-    const cooldown = Number(document.getElementById('cooldownPeriod').value);
+
     const minInstances = Number(document.getElementById('minInstances').value);
     const maxInstances = Number(document.getElementById('maxInstances').value);
-    const threshold = Number(document.getElementById('scaleThreshold').value);
-
-    if (minInstances <= 0 || maxInstances <= 0 || cooldown <= 0) {
-        alert('Values must be positive');
-        return;
-    }
+    const scaleDownThreshold = Number(document.getElementById('scaleDownThreshold').value);
+    const scaleUpThreshold = Number(document.getElementById('scaleUpThreshold').value);
     if (minInstances > maxInstances) {
-        alert('Minimum instances cannot be greater than maximum instances');
+        showSettingsFeedback('Min Instances must be less than or equal to Max Instances.', true);
+        return;
+    }
+    if(scaleDownThreshold >= scaleUpThreshold) {
+        showSettingsFeedback('Scale Down Threshold must be less than Scale Up Threshold.', true);
         return;
     }
 
-    const settings = { cooldown, minInstances, maxInstances, threshold };
-    const key = `scalingSettings_${settings_current_service}`;
-    try {
-        localStorage.setItem(key, JSON.stringify(settings));
-        const feedback = document.getElementById('settingsFeedback');
-        feedback.style.display = 'block';
-        setTimeout(() => feedback.style.display = 'none', 2000);
-    } catch (e) {
-        console.error('Failed to save settings', e);
-        alert('Failed to save settings');
-    }
- }
+    showSettingsFeedback('Settings saved.', false);
 
- function resetSettings() {
-    const defaults = { cooldown: 5, minInstances: 1, maxInstances: 5, threshold: 75 };
-    document.getElementById('cooldownPeriod').value = defaults.cooldown;
-    document.getElementById('minInstances').value = defaults.minInstances;
-    document.getElementById('maxInstances').value = defaults.maxInstances;
-    document.getElementById('scaleThreshold').value = defaults.threshold;
-    if (settings_current_service) {
-        const key = `scalingSettings_${settings_current_service}`;
-        localStorage.removeItem(key);
-    }
-    const feedback = document.getElementById('settingsFeedback');
-    feedback.textContent = 'Settings reset.';
-    feedback.style.display = 'block';
-    setTimeout(() => { feedback.style.display = 'none'; feedback.textContent = 'Settings saved.' }, 2000);
- }
-
- function loadSettingsToForm() {
-    try {
-        if (!settings_current_service) return;
-        const key = `scalingSettings_${settings_current_service}`;
-        const raw = localStorage.getItem(key);
-        if (!raw) return;
-        const s = JSON.parse(raw);
-        if (s.cooldown) document.getElementById('cooldownPeriod').value = s.cooldown;
-        if (s.minInstances) document.getElementById('minInstances').value = s.minInstances;
-        if (s.maxInstances) document.getElementById('maxInstances').value = s.maxInstances;
-        if (s.threshold) document.getElementById('scaleThreshold').value = s.threshold;
-    } catch (e) { console.warn('Could not load settings from storage', e); }
 }

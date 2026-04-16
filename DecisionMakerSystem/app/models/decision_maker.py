@@ -63,7 +63,6 @@ class DecisionMaker:
         if time.time() - self.last_decision_time_seconds < self.cooldown_seconds:
             print(f"In cooldown period, holding decision.{time.time() - self.last_decision_time_seconds} seconds. against cooldown of {self.cooldown_seconds} seconds.")
             return "Hold"
-        print(self.prediction_window)
         if len(self.prediction_window) >= self.scale_up_consideration_length:
             recent_predictions = list(self.prediction_window)[-self.scale_up_consideration_length:]
             if all(pred > self.scale_up_threshold for pred in recent_predictions):
