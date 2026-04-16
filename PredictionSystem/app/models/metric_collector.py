@@ -57,7 +57,7 @@ class MetricCollector(MetricCollectorInterface):
             print("Writing data to training_data.csv:", aggregated_data)
             if not file_exists:
 
-                writer.writerow(["timestamp", "cpu_avg", "memory_sum", "rps", "instance_count"])
+                writer.writerow(["timestamp", "cpu_avg", "memory_sum", "requests_per_second", "instance_count"])
 
             writer.writerow([
                 time.time(),

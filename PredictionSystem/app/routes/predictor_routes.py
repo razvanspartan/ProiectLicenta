@@ -55,23 +55,22 @@ def register_routes(app):
 
     def aggregate_metrics_for_smoothing():
         for metric_collector_name, metric_collector in metric_collector_factory.metric_collectors.items():
-            smoothing_predictor = smoothing_predictor_factory.get_smoothing_predictor(metric_collector_name)
             lightgbm_predictor = lightgbm_factory.get_lightgbm_predictor(metric_collector_name)
             data_point = metric_collector.aggregate_metrics()
-            smoothing_predictor.update_model(data_point)
+            if lightgbm_predictor.model is None:
+                continue
             prediction_lgbm = lightgbm_predictor.predict(data_point)
             print(prediction_lgbm)
-            if(prediction_lgbm):
+            if prediction_lgbm :
                 lightgbm_predictor.save_model()
-            prediction = smoothing_predictor.predict(steps=3)
-            if prediction is None:
+            if prediction_lgbm is None:
                 print("No prediction available")
-                return
+                continue
             try:
-                requests.post(f"http://localhost:5000/api/v1/decisionmaker/scale/{metric_collector_name}", json={"cpu": prediction})
+                requests.post(f"http://localhost:5000/api/v1/decisionmaker/scale/{metric_collector_name}", json={"cpu": prediction_lgbm})
             except Exception as e:
                 print(f"Error sending scaling decision for {metric_collector_name}: {e}")
-            print(f"Predicted CPU usage for {metric_collector_name} in 3(5s) steps: {prediction}")
+            print(f"Predicted CPU usage for {metric_collector_name} in 3(5s) steps: {prediction_lgbm}")
 
     def extract_metrics_from_container(container) -> dict:
         stats = container.stats(stream=False)

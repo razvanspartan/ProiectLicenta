@@ -7,10 +7,11 @@
   <title>MLScale Dashboard</title>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module" src="index.js"></script>
+
     <body>
-    <nav></nav>
-        <div id="list-services" class="list-services-container">
+    <div id="serviceView" class="view">
+        <div id="listServices" class="list-services-container">
+            <button class="settings-button" id="settingsButton">Scaling settings</button>
             <h1>Known Services:</h1>
             <button class="service-button" id="bookServiceButton">
                 bookService
@@ -19,16 +20,21 @@
                 orderService
             </button>
         </div>
-        <div class="service-data-container">
-            <h1 id="service-title">Choose a service</h1>
-            <div class="chart-container">
-            <canvas id="service_chart"></canvas>
+            <div class="service-data-container" id="serviceDataContainer">
+                <h1 id="serviceTitle">Choose a service</h1>
+                <div class="chart-container">
+                <canvas id="serviceChart"></canvas>
+                </div>
+                <div class="container-list-container" id="containerListContainer">
+                </div>
             </div>
-            <div class="container-list-container" id="container-list-container">
+            <div class="service-data-container-hidden" id="settingsContainer">
+
             </div>
-        </div>
-    <div id="loading-overlay" class="loader-hidden">
+    </div>
+    <div id="loadingOverlay" class="loader-hidden">
         <div class="spinner"></div>
     </div>
+    <script type="module" src="index.js"></script>
     </body>
 </html>

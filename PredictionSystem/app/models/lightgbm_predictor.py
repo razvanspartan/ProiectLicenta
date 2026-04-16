@@ -16,10 +16,22 @@ class LightGBMPredictor:
         self.target_col = "cpu_avg"
         self.feature_columns = None
         self._window = pd.DataFrame()
+        self._min_rows_required = self.n_lags + self.horizon + 2
 
     def start_model(self):
-        df = pd.read_csv(f"training_data_{self.name}.csv")
+        csv_path = Path(f"training_data_{self.name}.csv")
+        if not csv_path.is_file():
+            return False
+        try:
+            df = pd.read_csv(csv_path)
+        except Exception:
+            return False
+
+        if df.empty or len(df) < self._min_rows_required:
+            return False
+
         self.train_model(df)
+        return True
 
     def transform_for_lgbm(self, df, target_col="cpu_avg", horizon=5, n_lags=3, with_target: bool = True):
         df = df.copy()
