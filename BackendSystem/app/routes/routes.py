@@ -1,3 +1,5 @@
+from flask import request
+import requests
 import docker
 
 try:
@@ -77,3 +79,24 @@ def register_routes(app):
             "cpu": round(cpu_percent, 2),
             "memory": round(mem_percent, 2),
         }
+    @app.route('/api/v1/backend/settings/<service_name>', methods=['POST'])
+    def post_settings(service_name):
+        data = request.get_json()
+        response = requests.post(f"http://localhost:5000/api/v1/decisionmaker/update_settings/{service_name}", json=data)
+        return response.json(), 200
+
+    @app.route('/api/v1/backend/settings/<service_name>', methods=['GET'])
+    def get_settings(service_name):
+        response = requests.get(f"http://localhost:5000/api/v1/decisionmaker/settings/{service_name}")
+        settings = response.json().get("settings")
+        if not settings:
+            return {"error": "Failed to retrieve settings"}, 500
+        print(f"Retrieved settings for {service_name}: {settings}")
+        data_to_send = {
+            "cooldownPeriod": settings.get("cooldown_period"),
+            "scaleUpThreshold": settings.get("scale_up_threshold"),
+            "scaleDownThreshold": settings.get("scale_down_threshold"),
+            "minInstances": settings.get("minimum_instances"),
+            "maxInstances": settings.get("maximum_instances"),
+        }
+        return data_to_send, 200

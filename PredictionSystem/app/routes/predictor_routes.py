@@ -6,13 +6,10 @@ from app.models.metric_collector_factory import MetricCollectorFactory
 from app.models.smoothing_predictor_factory import SmoothingPredictorFactory
 import docker
 
-from app.models.SGDRegressor_factory import SGDRegressorPredictorFactory
-
 from app.models.lightgbm_factory import LightgbmFactory
 
 metric_collector_factory = MetricCollectorFactory()
 smoothing_predictor_factory = SmoothingPredictorFactory()
-sgd_regressor_factory = SGDRegressorPredictorFactory()
 lightgbm_factory = LightgbmFactory()
 try:
     docker_client = docker.DockerClient(base_url='unix:///var/run/docker.sock')

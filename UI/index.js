@@ -131,7 +131,18 @@ function toggleLoader(show) {
         loader.classList.add('loader-hidden');
     }
 }
-
+function showFetchedSettings(data) {
+    console.log(data);
+        document.getElementById('cooldownPeriod').value = data.cooldownPeriod;
+        document.getElementById('minInstances').value = data.minInstances;
+        document.getElementById('maxInstances').value = data.maxInstances;
+        document.getElementById('scaleUpThreshold').value = data.scaleUpThreshold;
+        document.getElementById('scaleDownThreshold').value = data.scaleDownThreshold;
+}
+async function fetchSettings() {
+        const response = await fetch(`http://localhost:3005/api/v1/backend/settings/${current_service}`);
+        return response.json();
+}
 function switchToToSettings() {
     if (isInsideSettings) {
         showServiceView();
@@ -140,6 +151,8 @@ function switchToToSettings() {
         document.getElementById('serviceView').classList.add('view-hidden');
         document.getElementById('settingsView').classList.remove('view-hidden');
         document.getElementById('settingsButton').textContent = 'Back to Service';
+        fetchSettings().then((data) => showFetchedSettings(data)).catch(() => showSettingsFeedback('Error fetching settings.', true));
+
     }
     isInsideSettings = !isInsideSettings;
 }
@@ -155,14 +168,13 @@ function showSettingsFeedback(message, isError = false) {
     el.textContent = message;
     if (isError) el.classList.add('error'); else el.classList.remove('error');
 }
-
-function saveSettings() {
+function validateSettingFields(){
     const fields = [
         { id: 'cooldownPeriod', name: 'Cooldown Period' },
         { id: 'minInstances', name: 'Min Instances' },
         { id: 'maxInstances', name: 'Max Instances' },
         { id: 'scaleUpThreshold', name: 'Scale Up Threshold' },
-        {id: 'scaleDownThreshold', name: 'Scale Down Threshold' },
+        { id: 'scaleDownThreshold', name: 'Scale Down Threshold' },
     ];
 
     for (const f of fields) {
@@ -190,9 +202,22 @@ function saveSettings() {
     }
     if(scaleDownThreshold >= scaleUpThreshold) {
         showSettingsFeedback('Scale Down Threshold must be less than Scale Up Threshold.', true);
-        return;
     }
-
-    showSettingsFeedback('Settings saved.', false);
-
+}
+async function setSettings(){
+    await fetch(`http://localhost:3005/api/v1/backend/settings/${current_service}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            cooldownPeriod: Number(document.getElementById('cooldownPeriod').value),
+            minInstances: Number(document.getElementById('minInstances').value),
+            maxInstances: Number(document.getElementById('maxInstances').value),
+            scaleUpThreshold: Number(document.getElementById('scaleUpThreshold').value),
+            scaleDownThreshold: Number(document.getElementById('scaleDownThreshold').value),
+        })
+    });
+}
+function saveSettings() {
+    validateSettingFields();
+    setSettings().then(() => showSettingsFeedback('Settings saved.', false)).catch(() => showSettingsFeedback('Error saving settings.', true));
 }

@@ -80,3 +80,21 @@ class DecisionMaker:
 
     def decrease_instance_count(self):
         self.instance_count -= 1
+
+    def get_settings(self):
+        return {
+            "cooldown_period": self.cooldown_seconds,
+            "scale_up_threshold": (self.scale_up_threshold/CONSTANTS["SERVICE_CPU"])*100,
+            "scale_down_threshold": (self.scale_down_threshold/CONSTANTS["SERVICE_CPU"])*100,
+            "minimum_instances": self.min_instances,
+            "maximum_instances": self.max_instances,
+        }
+
+    def update_settings(self, data):
+        self.scale_up_threshold = data.get("scaleUpThreshold") * CONSTANTS["SERVICE_CPU"] / 100
+        self.scale_down_threshold = data.get("scaleDownThreshold") * CONSTANTS["SERVICE_CPU"] / 100
+        self.cooldown_seconds = float(data.get("cooldownPeriod"))
+        self.min_instances = int(data.get("minInstances"))
+        self.max_instances = int(data.get("maxInstances"))
+
+
