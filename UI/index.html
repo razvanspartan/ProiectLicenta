@@ -1,60 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="index.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MLScale Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLScale Dashboard</title>
 </head>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <body>
+<body>
     <div class="view">
+
         <div id="listServices" class="list-services-container">
-            <button class="setting-button hidden" id="settingsButton">Scaling settings</button>
-            <h1>Known Services:</h1>
-            <button class="service-button" id="bookserviceButton">
+            <button class="setting-button hidden" id="settingsButton">
+                Scaling settings
+            </button>
+
+            <h1 class="panel-header">Known Services</h1>
+
+            <p class="panel-sub">
+                Select a service to view its recent metrics and running containers.
+            </p>
+
+            <button class="service-button"
+                    id="bookserviceButton"
+                    aria-pressed="false"
+                    data-service="bookservice">
                 bookService
             </button>
-            <button class="service-button" id="orderserviceButton">
+
+            <button class="service-button"
+                    id="orderserviceButton"
+                    aria-pressed="false"
+                    data-service="orderservice">
                 orderService
             </button>
+
+            <div class="panel-footer">
+                Tip: Select a service, then open Scaling settings to adjust autoscaler values.
+            </div>
         </div>
-            <div class="service-data-container" id="serviceView">
+
+        <div class="service-data-container" id="serviceView">
+
+            <div class="service-header">
                 <h1 id="serviceTitle">Choose a service</h1>
-                <div class="chart-container">
+
+                <p id="serviceDescription" class="hint">
+                    No service selected. Click a service on the left to load metrics.
+                </p>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-info">
+                    This chart shows the recent CPU usage for the selected service.
+                </div>
+
                 <canvas id="serviceChart"></canvas>
-                </div>
-                <div class="container-list-container" id="containerListContainer">
-                </div>
             </div>
-            <div class="service-data-container view-hidden" id="settingsView">
-                <h1 id="settingsTitle">Scaling Settings</h1>
-                <form id="settingsForm" class="settings-form">
-                    <label for="cooldownPeriod">Cooldown Period (seconds):</label>
-                    <input type="number" id="cooldownPeriod" class="input-field" min="1" max="600" required>
 
-                    <label for="minInstances">Minimum Instances:</label>
-                    <input type="number" id="minInstances" class="input-field" min="1" max="8" required>
-
-                    <label for="maxInstances">Max Instances:</label>
-                    <input type="number" id="maxInstances" class="input-field" min="1" max="8" required>
-
-                    <label for="scaleUpThreshold">Scale UP Threshold (% CPU):</label>
-                    <input type="number" id="scaleUpThreshold" class="input-field" min="50" max="90" required>
-
-                    <label for="scaleDownThreshold">Scale DOWN Threshold (% CPU):</label>
-                    <input type="number" id="scaleDownThreshold" class="input-field" min="10" max="49" required>
-
-                    <div class="settings-buttons">
-                        <button type="button" class="btn primary" id="settingsSaveButton">Save</button>
-                    </div>
-
-                    <div id="settingsFeedback" class="settings-feedback" style="display:none;">Settings saved.</div>
-                </form>
+            <div class="container-list-container"
+                 id="containerListContainer">
             </div>
+        </div>
+
+        <div class="service-data-container view-hidden"
+             id="settingsView">
+
+            <h1 id="settingsTitle">Scaling Settings</h1>
+
+            <p class="hint">
+                These values control the autoscaling behavior for the selected service.
+            </p>
+
+            <form id="settingsForm"
+                  class="settings-form"
+                  novalidate>
+
+                <label for="cooldownPeriod">
+                    Cooldown Period (seconds)
+                </label>
+
+                <input type="number"
+                       id="cooldownPeriod"
+                       class="input-field"
+                       min="1"
+                       max="600"
+                       step="1">
+
+                <div class="hint">
+                    Time to wait after a scaling action before another action can be taken.
+                </div>
+
+                <label for="minInstances">
+                    Minimum Instances
+                </label>
+
+                <input type="number"
+                       id="minInstances"
+                       class="input-field"
+                       min="1"
+                       max="8"
+                       step="1">
+
+                <div class="hint">
+                    Minimum number of service instances to keep running.
+                </div>
+
+                <label for="maxInstances">
+                    Maximum Instances
+                </label>
+
+                <input type="number"
+                       id="maxInstances"
+                       class="input-field"
+                       min="1"
+                       max="8"
+                       step="1">
+
+                <div class="hint">
+                    Upper limit for instances to prevent runaway scaling.
+                </div>
+
+                <label for="scaleUpThreshold">
+                    Scale UP Threshold (% CPU)
+                </label>
+
+                <input type="number"
+                       id="scaleUpThreshold"
+                       class="input-field"
+                       min="50"
+                       max="90"
+                       step="1">
+
+                <div class="hint">
+                    If CPU exceeds this percentage, the system will scale up.
+                </div>
+
+                <label for="scaleDownThreshold">
+                    Scale DOWN Threshold (% CPU)
+                </label>
+
+                <input type="number"
+                       id="scaleDownThreshold"
+                       class="input-field"
+                       min="10"
+                       max="49"
+                       step="1">
+
+                <div class="hint">
+                    If CPU stays below this percentage, the system will scale down.
+                </div>
+
+                <div class="settings-buttons">
+                    <button type="submit"
+                            class="btn primary"
+                            id="settingsSaveButton">
+                        Save
+                    </button>
+                </div>
+
+                <div id="settingsFeedback"
+                     class="settings-feedback"
+                     style="display:none;">
+                </div>
+            </form>
+        </div>
     </div>
-     <div id="loadingOverlay" class="loader-hidden">
-         <div class="spinner"></div>
-     </div>
-     <script type="module" src="index.js"></script>
+
+    <div id="loadingOverlay" class="loader-hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <script type="module" src="index.js"></script>
+</body>
+</html>

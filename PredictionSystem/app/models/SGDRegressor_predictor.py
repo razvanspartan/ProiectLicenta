@@ -5,30 +5,32 @@ import pickle
 
 from sklearn.linear_model import SGDRegressor
 from sklearn.preprocessing import StandardScaler
+
+
 class SGDRegressorPredictor:
     def __init__(self, name):
-        self.scaler=StandardScaler()
+        self.scaler = StandardScaler()
         self.name = name
         self.window_size = 600
         self.data = deque(maxlen=self.window_size)
         self.min_feature_batch = 30
         self.model = SGDRegressor(
-            loss='squared_error',
-            penalty='l2',
+            loss="squared_error",
+            penalty="l2",
             alpha=0.001,
-            learning_rate='adaptive',
+            learning_rate="adaptive",
             eta0=0.02,
             warm_start=True,
             max_iter=1,
-            tol=None
+            tol=None,
         )
-        self.window=deque(maxlen=self.window_size)
+        self.window = deque(maxlen=self.window_size)
         self.is_fitted = False
-        self.feature_batch = deque(maxlen=self.min_feature_batch+1)
+        self.feature_batch = deque(maxlen=self.min_feature_batch + 1)
 
     def create_features_from_window(self, window):
         cpu = np.array(window)
-        if len(cpu)<30:
+        if len(cpu) < 30:
             return None
         features = [
             cpu[-1],
@@ -102,5 +104,5 @@ class SGDRegressorPredictor:
             return False
         else:
             with open(path, "rb") as f:
-                self.model= pickle.load(f)
+                self.model = pickle.load(f)
         return None
