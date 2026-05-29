@@ -3,12 +3,22 @@ from collections import deque
 
 import docker
 import subprocess
-CONSTANTS={
-    "SERVICE_CPU": 25.0
-}
+
+CONSTANTS = {"SERVICE_CPU": 25.0}
+
 
 class DecisionMaker:
-    def __init__(self, service_name, min_instances=1, max_instances=5, cooldown_seconds=30, scale_up_threshold=0.7, scale_down_threshold=0.2, scale_down_consideration_length=3, scale_up_consideration_length=3):
+    def __init__(
+        self,
+        service_name,
+        min_instances=1,
+        max_instances=5,
+        cooldown_seconds=30,
+        scale_up_threshold=0.7,
+        scale_down_threshold=0.2,
+        scale_down_consideration_length=1,
+        scale_up_consideration_length=1,
+    ):
         self.service_name = service_name
         self.min_instances = min_instances
         self.max_instances = max_instances
@@ -24,13 +34,20 @@ class DecisionMaker:
 
     def add_prediction_point(self, prediction):
         self.prediction_window.append(prediction)
+
     def scale_down(self):
         try:
             compose_file = "/home/razvanspartan/PycharmProjects/ProiectLicenta/BookService/compose.yaml"
             target_count = self.instance_count - 1
             cmd = [
-                "docker", "compose","-f", compose_file, "up", "-d",
-                "--scale", f"{self.service_name}={target_count}"
+                "docker",
+                "compose",
+                "-f",
+                compose_file,
+                "up",
+                "-d",
+                "--scale",
+                f"{self.service_name}={target_count}",
             ]
 
             subprocess.run(cmd, check=True)
@@ -41,13 +58,20 @@ class DecisionMaker:
 
         except subprocess.CalledProcessError as e:
             print(f"Error scaling down via Docker Compose: {e}")
+
     def scale_up(self):
         try:
             compose_file = "/home/razvanspartan/PycharmProjects/ProiectLicenta/BookService/compose.yaml"
             target_count = self.instance_count + 1
             cmd = [
-                "docker", "compose","-f", compose_file, "up", "-d",
-                "--scale", f"{self.service_name}={target_count}"
+                "docker",
+                "compose",
+                "-f",
+                compose_file,
+                "up",
+                "-d",
+                "--scale",
+                f"{self.service_name}={target_count}",
             ]
 
             subprocess.run(cmd, check=True)
@@ -61,15 +85,21 @@ class DecisionMaker:
 
     def make_decision(self):
         if time.time() - self.last_decision_time_seconds < self.cooldown_seconds:
-            print(f"In cooldown period, holding decision.{time.time() - self.last_decision_time_seconds} seconds. against cooldown of {self.cooldown_seconds} seconds.")
+            print(
+                f"In cooldown period, holding decision.{time.time() - self.last_decision_time_seconds} seconds. against cooldown of {self.cooldown_seconds} seconds."
+            )
             return "Hold"
         if len(self.prediction_window) >= self.scale_up_consideration_length:
-            recent_predictions = list(self.prediction_window)[-self.scale_up_consideration_length:]
+            recent_predictions = list(self.prediction_window)[
+                -self.scale_up_consideration_length :
+            ]
             if all(pred > self.scale_up_threshold for pred in recent_predictions):
                 if self.instance_count < self.max_instances:
                     self.scale_up()
         if len(self.prediction_window) >= self.scale_down_consideration_length:
-            recent_predictions = list(self.prediction_window)[-self.scale_down_consideration_length:]
+            recent_predictions = list(self.prediction_window)[
+                -self.scale_down_consideration_length :
+            ]
             if all(pred < self.scale_down_threshold for pred in recent_predictions):
                 if self.instance_count > self.min_instances:
                     self.scale_down()
@@ -84,17 +114,23 @@ class DecisionMaker:
     def get_settings(self):
         return {
             "cooldown_period": self.cooldown_seconds,
-            "scale_up_threshold": (self.scale_up_threshold/CONSTANTS["SERVICE_CPU"])*100,
-            "scale_down_threshold": (self.scale_down_threshold/CONSTANTS["SERVICE_CPU"])*100,
+            "scale_up_threshold": (self.scale_up_threshold / CONSTANTS["SERVICE_CPU"])
+            * 100,
+            "scale_down_threshold": (
+                self.scale_down_threshold / CONSTANTS["SERVICE_CPU"]
+            )
+            * 100,
             "minimum_instances": self.min_instances,
             "maximum_instances": self.max_instances,
         }
 
     def update_settings(self, data):
-        self.scale_up_threshold = data.get("scaleUpThreshold") * CONSTANTS["SERVICE_CPU"] / 100
-        self.scale_down_threshold = data.get("scaleDownThreshold") * CONSTANTS["SERVICE_CPU"] / 100
+        self.scale_up_threshold = (
+            data.get("scaleUpThreshold") * CONSTANTS["SERVICE_CPU"] / 100
+        )
+        self.scale_down_threshold = (
+            data.get("scaleDownThreshold") * CONSTANTS["SERVICE_CPU"] / 100
+        )
         self.cooldown_seconds = float(data.get("cooldownPeriod"))
         self.min_instances = int(data.get("minInstances"))
         self.max_instances = int(data.get("maxInstances"))
-
-

@@ -1,4 +1,3 @@
-
 class ServiceInstance:
     def __init__(self, ip, port, service_name, failed_health_check_count=0):
         self.ip = ip

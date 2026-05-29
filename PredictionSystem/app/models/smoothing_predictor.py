@@ -25,7 +25,7 @@ class SmoothingPredictor:
 
         self.model = ExponentialSmoothing(
             np.array(self.data),
-            trend='add',
+            trend="add",
             seasonal=None,
             initialization_method="estimated",
         )

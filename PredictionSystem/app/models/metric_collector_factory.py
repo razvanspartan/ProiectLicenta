@@ -3,7 +3,6 @@ from typing import Dict
 from app.models.metric_collector import MetricCollector
 
 
-
 class MetricCollectorFactory:
     def __init__(self):
         self.metric_collectors = {}
