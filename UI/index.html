@@ -53,12 +53,16 @@
             </div>
 
             <div class="chart-container">
-                <div class="chart-info">
-                    This chart shows the recent CPU usage for the selected service.
-                </div>
+    <div class="chart-header">
+        <h2>CPU Usage</h2>
 
-                <canvas id="serviceChart"></canvas>
-            </div>
+        <div class="chart-info">
+            Current average CPU utilization across running containers.
+        </div>
+    </div>
+
+    <canvas id="serviceChart"></canvas>
+</div>
 
             <div class="container-list-container"
                  id="containerListContainer">

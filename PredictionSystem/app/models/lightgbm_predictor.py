@@ -13,7 +13,7 @@ matplotlib.use("Agg")
 
 
 class LightGBMPredictor:
-    def __init__(self, name: str, horizon: int = 2, n_lags: int = 3):
+    def __init__(self, name: str, horizon: int = 2, n_lags: int = 8):
         self.model = None
         self.name = name
         self.horizon = horizon
@@ -39,7 +39,7 @@ class LightGBMPredictor:
         return True
 
     def transform_for_lgbm(
-        self, df, target_col="cpu_avg", horizon=5, n_lags=3, with_target: bool = True
+        self, df, target_col="cpu_avg", horizon=5, n_lags=8, with_target: bool = True
     ):
         df = df.copy()
 
@@ -68,11 +68,13 @@ class LightGBMPredictor:
 
         df["cpu_rolling_mean"] = df["total_workload"].rolling(window=n_lags).mean()
         df["cpu_rolling_std"] = df["total_workload"].rolling(window=n_lags).std()
-
-        df = df.dropna().reset_index(drop=True)
+        if with_target:
+            df["target"] = df[actual_target].shift(-int(horizon))
 
         if "timestamp" in df.columns:
             df = df.drop(columns=["timestamp"])
+
+        df = df.dropna().reset_index(drop=True)
 
         return df
 
@@ -299,9 +301,9 @@ class LightGBMPredictor:
             linewidth=2,
         )
 
-        plt.title(f"Proactive Forecasting: {self.name} (R2: {r2:.3f})", fontsize=16)
+        plt.title(f"Forecasting graph: {self.name} (Horizon = {self.horizon})", fontsize=16)
 
-        plt.xlabel("Future Unseen Timesteps", fontsize=12)
+        plt.xlabel("Timesteps", fontsize=12)
         plt.ylabel("Total Workload", fontsize=12)
 
         plt.legend(loc="upper right")
