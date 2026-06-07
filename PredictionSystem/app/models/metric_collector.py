@@ -8,7 +8,6 @@ from app.interfaces.metric_collector_interface import MetricCollectorInterface
 class MetricCollector(MetricCollectorInterface):
     def __init__(self, service_name: str):
         self.service_name = service_name
-        self.window_size_seconds = 5
         self.instances = {}
 
     def collect_metrics(self, instance_name: str, metrics: dict) -> None:
