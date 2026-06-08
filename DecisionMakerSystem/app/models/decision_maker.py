@@ -13,7 +13,7 @@ class DecisionMaker:
         service_name,
         min_instances=1,
         max_instances=5,
-        cooldown_seconds=30,
+        cooldown_seconds=5,
         scale_up_threshold=0.7,
         scale_down_threshold=0.2,
         scale_down_consideration_length=1,

@@ -44,7 +44,7 @@ class LoadBalancer(LoadBalancerInterface):
             try:
                 response = requests.get(
                     f"http://{instance.ip}:{instance.port}/api/v1/{instance.service_name}/health",
-                    timeout=2,
+                    timeout=0.5,
                 )
                 if response.status_code != 200:
                     instance.failed_health_check_count += 1

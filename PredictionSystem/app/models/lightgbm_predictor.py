@@ -11,7 +11,7 @@ matplotlib.use("Agg")
 
 
 class LightGBMPredictor:
-    def __init__(self, name: str, horizon: int = 2, n_lags: int = 8):
+    def __init__(self, name: str, horizon: int = 3, n_lags: int = 8):
         self.model = None
         self.name = name
         self.horizon = horizon
@@ -37,12 +37,12 @@ class LightGBMPredictor:
         return True
 
     def transform_for_lgbm(
-        self, df, target_col="cpu_avg", horizon=5, n_lags=8, with_target: bool = True
+        self, df, target_col="cpu_avg", horizon=3, n_lags=8, with_target: bool = True
     ):
         df = df.copy()
 
         df["total_workload"] = df["cpu_avg"] * df["instance_count"]
-
+        df["total_rps"] = df["requests_per_second"] * df["instance_count"]
         actual_target = "total_workload" if target_col == "cpu_avg" else target_col
 
         cols_to_lag = [
@@ -51,6 +51,7 @@ class LightGBMPredictor:
             "requests_per_second",
             "instance_count",
             "total_workload",
+            "total_rps"
         ]
 
         if "cpu_avg" not in df.columns:
@@ -121,6 +122,7 @@ class LightGBMPredictor:
         self.horizon = int(horizon)
         self.n_lags = int(n_lags)
         self.target_col = target_col
+        self.save_model()
 
     def _append_to_window(self, point):
         if isinstance(point, pd.DataFrame):
@@ -177,6 +179,8 @@ class LightGBMPredictor:
             return None
 
         last_row = feats.tail(1)
+        print("INPUT TO PREDICT")
+        print(X)
         pred = self.model.predict(last_row[self.feature_columns])
         return float(pred[0])
 

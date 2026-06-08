@@ -3,13 +3,11 @@ import time
 
 import requests
 from app.models.metric_collector_factory import MetricCollectorFactory
-from app.models.smoothing_predictor_factory import SmoothingPredictorFactory
 import docker
 
 from app.models.lightgbm_factory import LightgbmFactory
 
 metric_collector_factory = MetricCollectorFactory()
-smoothing_predictor_factory = SmoothingPredictorFactory()
 lightgbm_factory = LightgbmFactory()
 try:
     docker_client = docker.DockerClient(base_url="unix:///var/run/docker.sock")
@@ -72,16 +70,17 @@ def register_routes(app):
             if lightgbm_predictor.model is None:
                 continue
             prediction_lgbm = lightgbm_predictor.predict(data_point)
-            print(prediction_lgbm)
-            if prediction_lgbm:
-                lightgbm_predictor.save_model()
+            print(
+                "Predicted value:",
+                prediction_lgbm
+            )
             if prediction_lgbm is None:
                 print("No prediction available")
                 continue
             try:
                 requests.post(
                     f"http://localhost:5000/api/v1/decisionmaker/scale/{metric_collector_name}",
-                    json={"cpu": prediction_lgbm},
+                    json={"cpu": prediction_lgbm/data_point["instance_count"]},
                 )
             except Exception as e:
                 print(

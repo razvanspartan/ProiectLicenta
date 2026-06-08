@@ -47,7 +47,6 @@ def register_routes(app):
     def health_check_services(interval=10):
         while True:
             for load_balancer in load_balancer_factory.load_balancers.values():
-                print(load_balancer.service_instances)
                 load_balancer.health_check_all_instances()
             time.sleep(interval)
 
@@ -74,7 +73,7 @@ def register_routes(app):
         }
         data = request.get_data()
         resp = requests.request(
-            method, url, headers=headers, data=data, params=request.args
+            method, url, headers=headers, data=data, params=request.args, timeout=(0.5, 2)
         )
         print("Sent request to:", url)
         load_balancer.count_request()

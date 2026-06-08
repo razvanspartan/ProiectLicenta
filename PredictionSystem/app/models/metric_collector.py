@@ -39,12 +39,7 @@ class MetricCollector(MetricCollectorInterface):
         }
         self.save_to_csv(data)
         self.instances.clear()
-        return {
-            "cpu_avg": cpu_avg,
-            "memory_sum": memory_sum,
-            "requests_per_second": requests_per_second,
-            "instance_count": len(self.instances),
-        }
+        return data
 
     def save_to_csv(self, aggregated_data):
         filename = f"training_data_{self.service_name}.csv"
@@ -70,6 +65,6 @@ class MetricCollector(MetricCollectorInterface):
                     aggregated_data["cpu_avg"],
                     aggregated_data["memory_sum"],
                     aggregated_data["requests_per_second"],
-                    len(self.instances),
+                    aggregated_data["instance_count"],
                 ]
             )
