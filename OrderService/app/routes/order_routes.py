@@ -1,11 +1,11 @@
-import socket
 import threading
 import time
 
-import requests
 from app.models.order import Order
 from app.models.order_books import OrderBook
 from flask import jsonify, request
+
+from app.services.registration_service import register_to_load_balancer
 
 
 def register_routes(app):
@@ -70,15 +70,18 @@ def register_routes(app):
         db.session.commit()
         return jsonify({"message": "order created"}), 201
 
-    def fib(n):
-        if n <= 1:
-            return n
-        return fib(n - 1) + fib(n - 2)
-
     @app.route("/api/v1/orderservice/expensive_cpu_computations", methods=["GET"])
     def expensive_cpu_computations():
-        result = fib(40)
-        return {"fib": result}
+        start = time.time()
+        work_duration = 0.3
+
+        while time.time() - start < work_duration:
+            x = 0
+            for i in range(10_000):
+                x += i * i
+            time.sleep(0.001)
+
+        return {"status": "completed", "computation_time": work_duration}
 
     @app.route("/api/v1/orderservice/expensive_memory_usage", methods=["GET"])
     def expensive_memory_usage():
@@ -90,29 +93,5 @@ def register_routes(app):
     def health_check():
         print("send heartbeat")
         return "OK", 200
-
-    def register_to_load_balancer():
-        while True:
-            load_balancer_url = "http://loadbalancer:7000/api/v1/loadbalancer/register"
-            data = {
-                "service_name": "orderservice",
-                "service_ip": socket.gethostbyname(socket.gethostname()),
-                "service_port": 4000,
-            }
-            try:
-                response = requests.post(load_balancer_url, json=data)
-                if response.status_code == 201:
-                    print(
-                        "OrderService instance registered with Load Balancer successfully."
-                    )
-                else:
-                    print(
-                        "OrderService instance registration with Load Balancer failed."
-                    )
-            except Exception as e:
-                print(
-                    f"error registering OrderService instance with Load Balancer: {e}"
-                )
-            time.sleep(10)
 
     threading.Thread(target=register_to_load_balancer, daemon=True).start()

@@ -1,11 +1,10 @@
 import threading
-import time
 
 from flask import request
 import requests
 
 from app.services.load_balancer_factory import LoadBalancerFactory
-
+from app.services.health_check_service import health_check_services
 from app.models.service_instance import ServiceInstance
 
 load_balancer_factory = LoadBalancerFactory()
@@ -43,12 +42,6 @@ def register_routes(app):
             load_balancer.remove_service_instance(service_instance)
             return {"message": "Service instance unregistered successfully."}, 200
         return {"message": "Service instance not found."}, 404
-
-    def health_check_services(interval=10):
-        while True:
-            for load_balancer in load_balancer_factory.load_balancers.values():
-                load_balancer.health_check_all_instances()
-            time.sleep(interval)
 
     @app.route(
         "/api/v1/<path:path>",
@@ -95,4 +88,6 @@ def register_routes(app):
             "requests_per_second": load_balancer.get_requests_per_second(),
         }
 
-    threading.Thread(target=health_check_services, daemon=True).start()
+    threading.Thread(
+        target=health_check_services, args=(load_balancer_factory,), daemon=True
+    ).start()

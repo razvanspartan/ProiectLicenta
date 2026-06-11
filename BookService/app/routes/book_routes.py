@@ -1,12 +1,11 @@
-import os
-import threading
 import time
+import threading
 
-from flask import jsonify
-from flask import request
-import requests
+from flask import jsonify, request
 from app.models.book import Book
 import socket
+
+from app.services.registration_service import register_to_load_balancer
 
 
 def register_routes(app):
@@ -54,11 +53,6 @@ def register_routes(app):
         db.session.commit()
         return jsonify({"message": "book created"}), 201
 
-    def fib(n):
-        if n <= 1:
-            return n
-        return fib(n - 1) + fib(n - 2)
-
     @app.route("/api/v1/bookservice/expensive_cpu_computations", methods=["GET"])
     def expensive_cpu_computations():
         start = time.time()
@@ -82,19 +76,5 @@ def register_routes(app):
     def health_check():
         print("send heartbeat")
         return "OK", 200
-
-    def register_to_load_balancer():
-        while True:
-            load_balancer_url = "http://loadbalancer:7000/api/v1/loadbalancer/register"
-            data = {
-                "service_name": "bookservice",
-                "service_ip": socket.gethostbyname(socket.gethostname()),
-                "service_port": 6000,
-            }
-            try:
-                requests.post(load_balancer_url, json=data, timeout=2)
-            except Exception as e:
-                print(f"Error registering BookService with Load Balancer: {e}")
-            time.sleep(5)
 
     threading.Thread(target=register_to_load_balancer, daemon=True).start()
