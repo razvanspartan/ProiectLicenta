@@ -23,6 +23,15 @@ echo "Building bookservice..."
 echo "Starting bookservice..."
 (cd BookService && docker compose up -d)
 
+echo "Stopping orderservice..."
+(cd OrderService && docker compose down --remove-orphans)
+
+echo "Building orderservice..."
+(cd OrderService && docker compose build)
+
+echo "Starting orderservice..."
+(cd OrderService && docker compose up -d)
+
 echo "Stopping LoadBalancerSystem..."
 (cd LoadBalancerSystem && docker compose down --remove-orphans)
 

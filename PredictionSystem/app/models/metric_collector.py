@@ -8,7 +8,6 @@ from app.interfaces.metric_collector_interface import MetricCollectorInterface
 class MetricCollector(MetricCollectorInterface):
     def __init__(self, service_name: str):
         self.service_name = service_name
-        self.window_size_seconds = 5
         self.instances = {}
 
     def collect_metrics(self, instance_name: str, metrics: dict) -> None:
@@ -40,12 +39,7 @@ class MetricCollector(MetricCollectorInterface):
         }
         self.save_to_csv(data)
         self.instances.clear()
-        return {
-            "cpu_avg": cpu_avg,
-            "memory_sum": memory_sum,
-            "requests_per_second": requests_per_second,
-            "instance_count": len(self.instances),
-        }
+        return data
 
     def save_to_csv(self, aggregated_data):
         filename = f"training_data_{self.service_name}.csv"
@@ -71,6 +65,6 @@ class MetricCollector(MetricCollectorInterface):
                     aggregated_data["cpu_avg"],
                     aggregated_data["memory_sum"],
                     aggregated_data["requests_per_second"],
-                    len(self.instances),
+                    aggregated_data["instance_count"],
                 ]
             )

@@ -49,17 +49,23 @@ function updateChart(data) {
 
     if (!chart) {
         chart = new Chart(domChart, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
                 labels: ['Used CPU', 'Unused CPU'],
                 datasets: [{
-                    data: [usedCpu, unusedCpu]
+                    data: [usedCpu, unusedCpu],
+                    backgroundColor: [
+                        '#2563eb',
+                        '#cbd5e1'
+                    ],
+                    borderWidth: 0
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%'
+        }
         });
     } else {
         chart.data.datasets[0].data = [usedCpu, unusedCpu];
