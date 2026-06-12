@@ -42,7 +42,6 @@ class LightGBMPredictor:
         df = df.copy()
 
         df["total_workload"] = df["cpu_avg"] * df["instance_count"]
-        df["total_rps"] = df["requests_per_second"] * df["instance_count"]
         actual_target = "total_workload" if target_col == "cpu_avg" else target_col
 
         cols_to_lag = [
@@ -51,7 +50,6 @@ class LightGBMPredictor:
             "requests_per_second",
             "instance_count",
             "total_workload",
-            "total_rps"
         ]
 
         if "cpu_avg" not in df.columns:

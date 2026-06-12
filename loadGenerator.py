@@ -26,7 +26,7 @@ def slow_rps_controller(stop_event):
 
     while not stop_event.is_set():
         elapsed = time.time() - start_time
-        base_load = 0.5 + 5 * abs(math.sin(elapsed / 45.0))
+        base_load = 1.5 + 3.5 * math.sin(elapsed / 60.0)
         target_rps = max(0.5, base_load + random.uniform(-0.5, 0.5))
         print(f"Time: {int(elapsed)}s | Target RPS: {target_rps:.2f}")
         time.sleep(5)
