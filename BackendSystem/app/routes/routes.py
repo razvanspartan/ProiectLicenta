@@ -14,7 +14,7 @@ def register_routes(app):
     @app.route("/api/v1/backend/containers", methods=["GET"])
     def get_containers():
         if docker_client is None:
-            return {"error": "Docker client not available"}, 503
+            return {"error": "docker client not available"}, 503
 
         try:
             containers = docker_client.containers.list()
@@ -32,12 +32,12 @@ def register_routes(app):
             return {"containers": container_info}, 200
         except Exception as e:
             print(f"Error listing containers: {e}")
-            return {"error": "Failed to retrieve containers"}, 500
+            return {"error": "failed to retrieve containers"}, 500
 
     @app.route("/api/v1/backend/metrics/<service_name>", methods=["GET"])
     def get_metrics(service_name):
         if docker_client is None:
-            return {"error": "Docker client not available"}, 503
+            return {"error": "docker client not available"}, 503
 
         try:
             containers = docker_client.containers.list()
@@ -54,7 +54,7 @@ def register_routes(app):
             return {"containers": metrics_info}, 200
         except Exception as e:
             print(f"Error retrieving metrics for service {service_name}: {e}")
-            return {"error": "Failed to retrieve metrics"}, 500
+            return {"error": "failed to retrieve metrics"}, 500
 
     def extract_metrics_from_container(container) -> dict:
         stats = container.stats(stream=False)
@@ -96,7 +96,7 @@ def register_routes(app):
         )
         settings = response.json().get("settings")
         if not settings:
-            return {"error": "Failed to retrieve settings"}, 500
+            return {"error": "failed to retrieve settings"}, 500
         print(f"Retrieved settings for {service_name}: {settings}")
         data_to_send = {
             "cooldownPeriod": settings.get("cooldown_period"),

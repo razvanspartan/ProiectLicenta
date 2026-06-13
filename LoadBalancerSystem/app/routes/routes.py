@@ -26,8 +26,8 @@ def register_routes(app):
         )
         if service_instance not in load_balancer.service_instances:
             load_balancer.add_service_instance(service_instance)
-            return {"message": "Service instance registered successfully."}, 201
-        return {"message": "Service instance already registered."}, 200
+            return {"message": "service instance registered"}, 201
+        return {"message": "service instance already registered"}, 200
 
     @app.route("/api/v1/loadbalancer/unregister", methods=["POST"])
     def unregister_service():
@@ -41,8 +41,8 @@ def register_routes(app):
         load_balancer = load_balancer_factory.get_load_balancer()
         if service_instance in load_balancer.service_instances:
             load_balancer.remove_service_instance(service_instance)
-            return {"message": "Service instance unregistered successfully."}, 200
-        return {"message": "Service instance not found."}, 404
+            return {"message": "service instance unregistered"}, 200
+        return {"message": "service instance not found"}, 404
 
     def health_check_services(interval=10):
         while True:
@@ -63,7 +63,7 @@ def register_routes(app):
         )
         service_instance = load_balancer.get_next_service_instance()
         if not service_instance:
-            return {"message": "No available service instances."}, 503
+            return {"message": "no available service instances"}, 503
         url = f"http://{service_instance.ip}:{service_instance.port}/api/v1/{service_name}/{forward_path}"
         method = request.method
         headers = {
@@ -84,7 +84,7 @@ def register_routes(app):
 
     @app.route("/api/v1/loadbalancer/test", methods=["GET"])
     def test_load_balancer():
-        return {"message": "Load Balancer is operational."}, 200
+        return {"message": "load balancer is up"}, 200
 
     @app.route("/api/v1/loadbalancer/metrics/<string:service_name>", methods=["GET"])
     def metrics(service_name):

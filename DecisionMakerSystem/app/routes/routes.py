@@ -13,7 +13,7 @@ def register_routes(app):
         decision_maker.add_prediction_point(cpu)
         decision = decision_maker.make_decision()
         print(decision)
-        return {"message": f"{decision} made based on CPU usage."}, 200
+        return {"message": f"{decision} based on cpu usage"}, 200
 
     @app.route("/api/v1/decisionmaker/settings/<service_name>", methods=["GET"])
     def get_settings(service_name):
@@ -26,4 +26,4 @@ def register_routes(app):
         data = request.get_json()
         decision_maker = decision_maker_factory.get_decision_maker(service_name)
         decision_maker.update_settings(data)
-        return {"message": f"Settings updated for {service_name}."}, 200
+        return {"message": f"settings updated for {service_name}"}, 200

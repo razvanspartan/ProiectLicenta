@@ -53,10 +53,10 @@ class LightGBMPredictor:
         ]
 
         if "cpu_avg" not in df.columns:
-            raise ValueError("Missing required column: cpu_avg")
+            raise ValueError("missing required column: cpu_avg")
 
         if with_target and actual_target not in df.columns:
-            raise ValueError(f"Missing target column: {actual_target}")
+            raise ValueError(f"missing target column: {actual_target}")
 
         for col in cols_to_lag:
             if col in df.columns:
@@ -91,7 +91,7 @@ class LightGBMPredictor:
 
         if processed_df.empty:
             raise ValueError(
-                "No rows left after feature engineering (check horizon/n_lags and data length)."
+                "no rows left after feature engineering - horizon/n_lags too large for dataset"
             )
 
         X = processed_df.drop(columns=["target"])
@@ -131,7 +131,7 @@ class LightGBMPredictor:
             new_df = pd.DataFrame([point])
         else:
             raise TypeError(
-                "predict() expects a dict, pandas Series, or pandas DataFrame for the new point(s)."
+                "unsupported type for point - expected dict, Series, or DataFrame"
             )
 
         self._window = pd.concat([self._window, new_df], ignore_index=True)
@@ -155,10 +155,10 @@ class LightGBMPredictor:
 
     def predict(self, X):
         if self.model is None:
-            raise RuntimeError("Model is not trained/loaded.")
+            raise RuntimeError("model not trained or loaded")
         if not self.feature_columns:
             raise RuntimeError(
-                "Missing feature_columns; train or load a model bundle first."
+                "feature_columns not set - model was never trained or loaded"
             )
 
         self._append_to_window(X)
@@ -184,7 +184,7 @@ class LightGBMPredictor:
 
     def save_model(self):
         if self.model is None:
-            raise RuntimeError("Nothing to save (model is not trained/loaded).")
+            raise RuntimeError("nothing to save - model not trained or loaded")
         os.makedirs("model", exist_ok=True)
         path = f"model/{self.name}_lightgbm.pkl"
 
@@ -224,7 +224,7 @@ class LightGBMPredictor:
         import numpy as np
 
         if not isinstance(df, pd.DataFrame):
-            raise TypeError("evaluate expects a pandas DataFrame")
+            raise TypeError("expected a pandas DataFrame")
 
         processed = self.transform_for_lgbm(
             df,
@@ -235,7 +235,7 @@ class LightGBMPredictor:
         )
 
         if processed.empty:
-            raise ValueError("No rows available after transformation for evaluation.")
+            raise ValueError("no rows left after transformation")
 
         split_idx = int(len(processed) * 0.8)
 
